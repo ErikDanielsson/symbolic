@@ -1,2 +1,2 @@
 # symbolic
-A symbolic math package
+A symbolic interpreter of mathematical expressions.
