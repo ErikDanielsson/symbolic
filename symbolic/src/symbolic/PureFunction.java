@@ -13,9 +13,18 @@ public abstract class PureFunction {
 	
 	public abstract ASTNode diff(ASTNode argument);
 	
-	public double eval(double arg) {
-		return function.apply(arg);
+	public ASTNode eval(ASTNode arg) {
+		if (arg instanceof Double_) {
+			Double_ value = (Double_) arg;
+			return new Double_(function.apply(value.getValue()));
+		} else {
+			return new Function_(arg.copy(), this.copy());
+		}
 	}
 	
 	public abstract PureFunction copy();
+	
+	public String toString() {
+		return name;
+	}
 }

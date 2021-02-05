@@ -7,12 +7,11 @@ public class Exponential extends PureFunction {
 	}
 	@Override
 	public ASTNode diff(ASTNode argument) {
-		return new Function(argument, new Exponential());
+		return new Function_(argument, new Exponential());
 	}
 
 	@Override
 	public PureFunction copy() {
 		return new Exponential();
 	}
-
 }

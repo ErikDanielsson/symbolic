@@ -1,9 +1,10 @@
 package symbolic;
 
-public class IdToken implements Token {
+public class IdToken extends Token {
 	private String id;
 	
 	public IdToken(String id) {
+		super(TokenType.ID);
 		this.id = id;
 	}
 	@Override

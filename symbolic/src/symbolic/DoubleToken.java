@@ -1,8 +1,9 @@
 package symbolic;
 
-public class DoubleToken implements Token {
+public class DoubleToken extends Token {
 	private double value;
 	public DoubleToken(double value) {
+		super(TokenType.DOUBLE);
 		this.value = value;
 	}
 	

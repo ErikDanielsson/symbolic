@@ -1,82 +1,126 @@
 package symbolic;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.function.Function;
+
 public class Lexer {
 	public static void main(String[] args) {
-		Lexer lexer = new Lexer("diff ( cos(x^2))");
-		try {
-			Token t = lexer.getToken();
-			while (!(t instanceof EOFToken)) {
-				System.out.println(t.toString());
-				t = lexer.getToken();
-			}
-		} catch (Exception e) {
-			System.out.println("Hejsan");
+		Scanner scan = new Scanner(System.in);
+
+		while (true) {
+			String input = scan.nextLine();
+			Lexer lexer = new Lexer(input);
+			Parser p = new Parser(lexer);
+
+			ASTNode tree = p.parse();
+			tree = tree.eval("", new Double_(1));
+			System.out.println(tree.toString());
 		}
+	}
+	private static Map<String, Function<Void, Token>> keywords;
+	static {
+		keywords = new HashMap<>();
+		keywords.put("diff", (Void v) -> new DiffToken());
+		keywords.put("eval", (Void v) -> new EvalToken());
 	}
 	String input;
 	int index;
 	int len;
+	char curr;
 
 	public Lexer(String input) {
 		this.input = input;
-		this.index = 0;
-		this.len = input.length() - 1;
+		this.index = -1;
+		this.len = input.length();
+		getChar();
 	}
 	
-	public Token getToken() throws Exception {
-		while (index != len) {
-			char curr = input.charAt(index);
+	private void getChar() {
+		index++;
+		if (index < len) {
+			curr = input.charAt(index);
+		} else {
+			curr = 0x00;
+		}
+	}
+	
+	public Token getToken() {
+		while (curr != 0x00) {
 			while (Character.isWhitespace(curr)) {
-				index++;
-				curr = input.charAt(index);
+				getChar();
 			}
 			if (Character.isAlphabetic(curr)) {
 				StringBuilder value = new StringBuilder();
 				do { 
 					value.append(curr);
-					index++;
-					curr = input.charAt(index);
-				} while (Character.isAlphabetic(input.charAt(index)));
-				return new IdToken(value.toString());
+					getChar();
+				} while (Character.isAlphabetic(curr));
+				String s = value.toString();
+				if (keywords.containsKey(s))
+					return keywords.get(s).apply(null);
+				else
+					return new IdToken(value.toString());
 			}
 			if (Character.isDigit(curr)) {
 				int value = 0;
 				do {
 					value *= 10;
 					value += curr - 0x30;
-					index++;
-					curr = input.charAt(index);
-				} while(Character.isDigit(curr));
+					getChar();
+				} while( index < len && Character.isDigit(curr));
 				if (curr == '.') {
-					index++;
-					curr = input.charAt(index);
+					getChar();
 					double dvalue = value;
 					int i = -1;
 					do {
-						dvalue += Math.pow(curr - 0x30, i);
+						dvalue += (curr - 0x30) * Math.pow(10, i);
 						i--;
-						index++;
-						curr = input.charAt(index);
+						getChar();
 					} while(Character.isDigit(curr));
 					return new DoubleToken(dvalue);
 				} else {
 					return new IntToken(value);
 				}
 			}
+			TokenType type;
 			switch(curr) {
 				case '(':
+					type = TokenType.LPAREN;
+					break;
 				case ')':
+					type = TokenType.RPAREN;
+					break;
 				case '+':
+					type = TokenType.PLUS;
+					break;
 				case '-':
+					type = TokenType.MINUS;
+					break;
 				case '*':
+					type = TokenType.MULT;
+					break;
 				case '/':
+					type = TokenType.DIV;
+					break;
 				case '^':
+					type = TokenType.EXP;
+					break;
 				case ',':
-					index++;
-					return new CharToken(curr);
+					type = TokenType.COMMA;
+					break;
+				case '=':
+					type = TokenType.EQUAL;
+					break;
+				case ';':
+					type = TokenType.SEMI;
+					break;
 				default:
-					throw new Exception("Unknown token!");
+					return null;
 			}
+			getChar();
+			return new CharToken(curr, type);
 		}
 		return new EOFToken();
 	}

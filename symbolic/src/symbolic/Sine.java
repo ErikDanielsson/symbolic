@@ -7,7 +7,7 @@ public class Sine extends PureFunction {
 	}
 	@Override
 	public ASTNode diff(ASTNode argument) {
-		return new Function(argument, new Cosine());
+		return new Function_(argument, new Cosine());
 	}
 
 	@Override

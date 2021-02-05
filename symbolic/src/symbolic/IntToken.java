@@ -1,8 +1,9 @@
 package symbolic;
 
-public class IntToken implements Token {
+public class IntToken extends Token {
 	private int value;
 	public IntToken(int value) {
+		super(TokenType.INT);
 		this.value = value;
 	}
 	

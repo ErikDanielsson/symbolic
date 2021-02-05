@@ -1,8 +1,9 @@
 package symbolic;
 
-public class CharToken implements Token {
+public class CharToken extends Token {
 	private char value;
-	public CharToken(char value) {
+	public CharToken(char value, TokenType type) {
+		super(type);
 		this.value = value;
 	}
 	

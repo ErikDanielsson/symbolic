@@ -1,5 +1,7 @@
 package symbolic;
 
-public class EOFToken implements Token {
-	public EOFToken() {}
+public class EOFToken extends Token {
+	public EOFToken() {
+		super(TokenType.EOF);
+	}
 }
