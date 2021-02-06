@@ -32,4 +32,14 @@ public class Double_ implements ASTNode {
 	public String toString() {
 		return Double.toString(value);
 	}
+
+	@Override
+	public boolean equal(Object other) {
+		if (!(other instanceof ASTNode))
+			throw new IllegalArgumentException();
+		if (!(other instanceof Double_))
+			return false;
+		return ((Double_)other).value == value;
+	}
+
 }

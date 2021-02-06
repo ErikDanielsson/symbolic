@@ -18,6 +18,10 @@ public class Function_ implements ASTNode {
 		return function.eval(argument.eval(var, x));
 	}
 
+	public String getFuncName() {
+		return function.name;
+	}
+
 	@Override
 	public ASTNode copy() {
 		return new Function_(argument.copy(), function.copy());
@@ -30,4 +34,15 @@ public class Function_ implements ASTNode {
 		}
 		return function.toString() + "(" + argument.toString() + ")";
 	}
+
+	@Override
+	public boolean equal(Object other) {
+		if (!(other instanceof ASTNode))
+			throw new IllegalArgumentException();
+		if (!(other instanceof Differentiate))
+			return false;
+		Function_ otherFunc = (Function_) other;
+		return otherFunc.argument.equals(argument) && otherFunc.function.equals(function);
+	}
+
 }

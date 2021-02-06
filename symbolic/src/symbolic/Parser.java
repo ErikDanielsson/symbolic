@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Parser for symbolic expression 
@@ -35,6 +36,8 @@ import java.util.function.Function;
  * 		| DOUBLE
  * 		| INT
  * 		| ID
+ * 		| '(' '-' exp )
+ * 
  */
 
 public class Parser {
@@ -51,13 +54,13 @@ public class Parser {
 		functions.put("ln" , (Void x) -> new Logarithm());
 	}
 
-	private static Map<String, Function<Void, Constant>> constants;
+	private static Map<String, Supplier<Constant>> constants;
 	static {
 		constants = new HashMap<>();
-		constants.put("e"   , (Void x) -> new Constant("e"));
-		constants.put("pi"  , (Void x) -> new Constant("pi"));
-		constants.put("em"  , (Void x) -> new Constant("em"));
-		constants.put("phi" , (Void x) -> new Constant("phi"));
+		constants.put("e"   , () -> new Constant(ConstantType.E));
+		constants.put("pi"  , () -> new Constant(ConstantType.PI));
+		constants.put("em"  , () -> new Constant(ConstantType.EULER_MASCHERONI));
+		constants.put("phi" , () -> new Constant(ConstantType.GOLDEN_RATIO));
 	}
 
 	public Parser(Lexer lexer) {
@@ -68,23 +71,15 @@ public class Parser {
 
 	}
 	
-	private void eat(TokenType expected) {
+	private void eat(TokenType expected) throws Exception {
 		if (expected == currToken.getType()) {
-			try {
-				if (newBuffer.isEmpty()) {
-					currToken = lexer.getToken();
-				} else {
-					currToken = newBuffer.pop();
-				}
-			} catch (Exception e) {
-				throw new LexException("Unknown token!", e);
+			if (newBuffer.isEmpty()) {
+				currToken = lexer.getToken();
+			} else {
+				currToken = newBuffer.pop();
 			}
 		} else {
-			try {
-				throw new Exception("");
-			} catch (Exception e) {
-				throw new ParseException("Did not expect token: " + currToken.toString(), e);
-			}
+			throw new ParseException("Did not expect token: " + currToken.toString());
 		}
 	}
 
@@ -99,13 +94,13 @@ public class Parser {
 		currToken = pastBuffer.pop();
 	}
 
-	public ASTNode parse() {
+	public ASTNode parse() throws Exception {
 		ASTNode expr = expr();
 		eat(TokenType.EOF);
 		return expr;
 	}
 	
-	private ASTNode expr() {
+	private ASTNode expr() throws Exception {
 		TokenType type = currToken.getType();
 		if (type == TokenType.EVAL) {
 			eat(TokenType.EVAL);
@@ -128,15 +123,23 @@ public class Parser {
 		} else {
 			ASTNode node = term();
 			type = currToken.getType();
-			while (type == TokenType.PLUS || type == TokenType.MINUS) {
-				node = new Addition(node, term(), type != TokenType.PLUS);
+			if (type == TokenType.PLUS || type == TokenType.MINUS) {
+				eat(type);
+				Addition add = new Addition(node, term(), type == TokenType.MINUS);
 				type = currToken.getType();
+				while (type == TokenType.PLUS || type == TokenType.MINUS) {
+					eat(type);
+					add.add(term(), type == TokenType.MINUS);
+					type = currToken.getType();
+				}
+				return add;
+			} else {
+				return node;
 			}
-			return node;
 		}
 	}
 	
-	private List<Tuple<String, ASTNode>> subList() {
+	private List<Tuple<String, ASTNode>> subList() throws Exception {
 		List<Tuple<String, ASTNode>> l = new ArrayList<>();
 		l.add(sub());
 		while (currToken.getType() == TokenType.COMMA) {
@@ -145,7 +148,7 @@ public class Parser {
 		}
 		return l;
 	}
-	private Tuple<String, ASTNode> sub() {
+	private Tuple<String, ASTNode> sub() throws Exception {
 		IdToken var = (IdToken) currToken;
 		eat(TokenType.ID);
 		String name = var.getValue();
@@ -153,7 +156,7 @@ public class Parser {
 		ASTNode expr = expr();
 		return new Tuple<>(name, expr);
 	}
-	private ASTNode term() {
+	private ASTNode term() throws Exception {
 		ASTNode node = factor();
 		TokenType type = currToken.getType();
 		while (type == TokenType.MULT || type == TokenType.DIV) {
@@ -169,7 +172,7 @@ public class Parser {
 		return node;
 	}
 	
-	private ASTNode	factor() {
+	private ASTNode	factor() throws Exception {
 		TokenType type = currToken.getType();
 		ASTNode node;
 		if (type == TokenType.CONSTANT) {
@@ -210,7 +213,7 @@ public class Parser {
 		return node;
 	}
 	
-	private ASTNode exp() {
+	private ASTNode exp() throws Exception {
 		TokenType type = currToken.getType();
 		switch (type) {
 			case ID: { 
@@ -224,11 +227,23 @@ public class Parser {
 					eat(TokenType.RPAREN);
 					return new Function_(expr, function);
 				} else if (constants.containsKey(name)) {
-					return constants.get(name).apply(null);
+					return constants.get(name).get();
 				} else {
 					return new Variable(name);
 				}
 			}
+			case LPAREN:
+				eat(TokenType.LPAREN);
+				if (currToken.getType() == TokenType.MINUS) {
+					eat(TokenType.MINUS);
+					ASTNode node = expr();
+					eat(TokenType.RPAREN);
+					return new Negate(node);
+				} else {
+					ASTNode node = expr();
+					eat(TokenType.RPAREN);
+					return node;
+				}
 			case DOUBLE: {
 				DoubleToken d = (DoubleToken) currToken;
 				eat(TokenType.DOUBLE);

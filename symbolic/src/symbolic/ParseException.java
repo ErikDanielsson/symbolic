@@ -1,8 +1,8 @@
 package symbolic;
 
-public class ParseException extends RuntimeException {
-	public ParseException(String msg, Throwable err) {
-		super(msg, err);
+public class ParseException extends Exception {
+	public ParseException(String msg) {
+		super(msg);
 	}
 
 }

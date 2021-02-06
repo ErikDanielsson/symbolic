@@ -27,4 +27,15 @@ public class Differentiate implements ASTNode {
 	public String toString() {
 		return "diff(" + var + ", " + expr.toString() + ")";
 	}
+	
+	@Override
+	public boolean equal(Object other) {
+		if (!(other instanceof ASTNode))
+			throw new IllegalArgumentException();
+		if (!(other instanceof Differentiate))
+			return false;
+		Differentiate otherDiff = (Differentiate) other;
+		return otherDiff.var.equals(var) && otherDiff.expr.equals(expr);
+	}
+
 }

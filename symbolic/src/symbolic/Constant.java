@@ -1,33 +1,30 @@
 package symbolic;
 
 public class Constant implements ASTNode {
-	String name;
-	Double value;
-	public Constant(String name) {
-		switch (name) {
-			case "e":
-				this.name = name;
+	private ConstantType type;
+	private String name;
+	private double value;
+
+	public Constant(ConstantType type) {
+		this.type = type;
+		switch (type) {
+			case E:
+				this.name = "e";
 				value = Math.E;
 				return;
-			case "pi":
+			case PI:
 				this.name = "\u03C0";
 				value = Math.PI;
 				return;
-			case "em":
-				this.name = "\u1D6FE";
+			case EULER_MASCHERONI:
+				this.name = "\u03B3";
 				value = 0.5772156649;
 				return;
-			case "phi":
+			case GOLDEN_RATIO:
 				this.name = "\u03C6";
 				value = (Math.sqrt(5)+1)/2;
 				return;
-			default:
-				return;
 		}
-	}
-	private Constant(String name, double value) {
-		this.name = name;
-		this.value = value;
 	}
 
 	@Override
@@ -42,11 +39,28 @@ public class Constant implements ASTNode {
 	
 	@Override
 	public ASTNode copy() {
-		return new Constant(new String(this.name),this.value);
+		return new Constant(this.type);
 	}
 
 	@Override
 	public String toString() {
 		return name;
+	}
+	
+	public ConstantType getType() {
+		return type;
+	}
+	
+	public double getValue() {
+		return value;
+	}
+
+	@Override
+	public boolean equal(Object other) {
+		if (!(other instanceof ASTNode))
+			throw new IllegalArgumentException();
+		if (!(other instanceof Constant))
+			return false;
+		return ((Constant)(other)).getType() == type;
 	}
 }

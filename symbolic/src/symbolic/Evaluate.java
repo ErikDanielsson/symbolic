@@ -40,4 +40,13 @@ public class Evaluate implements ASTNode {
 		sb.append(")");
 		return sb.toString();
 	}
+	@Override
+	public boolean equal(Object other) {
+		if (!(other instanceof ASTNode))
+			throw new IllegalArgumentException();
+		if (!(other instanceof Differentiate))
+			return false;
+		return false;
+	}
+
 }

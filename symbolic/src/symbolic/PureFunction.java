@@ -17,6 +17,8 @@ public abstract class PureFunction {
 		if (arg instanceof Double_) {
 			Double_ value = (Double_) arg;
 			return new Double_(function.apply(value.getValue()));
+		} else if (arg instanceof Constant) {
+			return new Double_(function.apply(((Constant)arg).getValue()));
 		} else {
 			return new Function_(arg.copy(), this.copy());
 		}
@@ -26,5 +28,12 @@ public abstract class PureFunction {
 	
 	public String toString() {
 		return name;
+	}
+	
+	public boolean equals(Object other) {
+		if (!(other instanceof PureFunction)) {
+			throw new IllegalArgumentException();
+		}
+		return ((PureFunction)other).name.equals(name);
 	}
 }

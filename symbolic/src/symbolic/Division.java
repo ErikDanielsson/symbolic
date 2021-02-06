@@ -4,7 +4,7 @@ public class Division implements ASTNode {
 	private ASTNode left;
 	private ASTNode right;
 	
-	public Division(ASTNode right, ASTNode left) {
+	public Division(ASTNode left, ASTNode right) {
 		this.left = left;
 		this.right = right;
 	}
@@ -40,4 +40,14 @@ public class Division implements ASTNode {
 	public String toString() {
 		return left.toString() + " / " + right.toString();
 	}
+
+	@Override
+	public boolean equal(Object other) {
+		if (!(other instanceof ASTNode))
+			throw new IllegalArgumentException();
+		if (!(other instanceof Differentiate))
+			return false;
+		return false;
+	}
+
 }
