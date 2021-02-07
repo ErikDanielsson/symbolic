@@ -14,8 +14,10 @@ public class Main {
 				ASTNode tree = p.parse();
 				tree = tree.eval("", new Double_(1));
 				System.out.println(tree.toString());
-			} catch (Exception e) {
-				System.out.println(e);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			} catch (LexException e) {
+				e.printStackTrace();
 			}
 		}
 	}

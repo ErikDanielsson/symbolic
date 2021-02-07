@@ -1,6 +1,14 @@
 package symbolic;
 
 public class Negate implements ASTNode {
+	public static Tuple<ASTNode, Boolean> getExpr(ASTNode node) {
+		if (node instanceof Negate) {
+			node = ((Negate)node).getExpr();
+			return new Tuple<>(node, true);
+		} else {
+			return new Tuple<>(node, false);
+		}
+	}
 	private ASTNode expr;
 	
 	public Negate(ASTNode expr) {
@@ -44,5 +52,4 @@ public class Negate implements ASTNode {
 		Negate otherNeg = (Negate) other;
 		return otherNeg.expr.equal(expr);
 	}
-
 }

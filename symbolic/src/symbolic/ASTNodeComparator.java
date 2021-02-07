@@ -122,6 +122,11 @@ public class ASTNodeComparator implements Comparator<ASTNode> {
 	}
 
 	private static int _compare(ASTNode arg0, ASTNode arg1) {
+		if (arg0 instanceof Negate)
+			arg0 = ((Negate)arg0).getExpr();
+		if (arg1 instanceof Negate)
+			arg1 = ((Negate)arg0).getExpr();
+
 		if (arg0.getClass() != arg1.getClass())
 			return valMap.get(arg1.getClass()) - valMap.get(arg0.getClass()); 
 		else {
@@ -132,6 +137,5 @@ public class ASTNodeComparator implements Comparator<ASTNode> {
 	public int compare(ASTNode arg0, ASTNode arg1) {
 		return -_compare(arg0, arg1);
 	}
-
 
 }

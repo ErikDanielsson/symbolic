@@ -12,7 +12,7 @@ public class Variable implements ASTNode {
 		if (var.equals(name)) {
 			return new Double_(1);
 		} else {
-			return new Variable(name);
+			return new Double_(0);
 		}
 	}
 

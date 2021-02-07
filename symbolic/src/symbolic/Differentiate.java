@@ -9,7 +9,7 @@ public class Differentiate implements ASTNode {
 	}
 	@Override
 	public ASTNode eval(String var, ASTNode x) {
-		ASTNode diffExpr = expr.diff(this.var);
+		ASTNode diffExpr = expr.eval("", null).diff(this.var);
 		return diffExpr.eval(var, x);
 	}
 

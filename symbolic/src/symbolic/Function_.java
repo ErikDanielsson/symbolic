@@ -22,6 +22,12 @@ public class Function_ implements ASTNode {
 		return function.name;
 	}
 
+	public ASTNode getArg() {
+		return argument;
+	}
+	public PureFunction getFunction() {
+		return function;
+	}
 	@Override
 	public ASTNode copy() {
 		return new Function_(argument.copy(), function.copy());

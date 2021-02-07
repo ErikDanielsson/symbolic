@@ -71,7 +71,7 @@ public class Parser {
 
 	}
 	
-	private void eat(TokenType expected) throws Exception {
+	private void eat(TokenType expected) throws ParseException, LexException {
 		if (expected == currToken.getType()) {
 			if (newBuffer.isEmpty()) {
 				currToken = lexer.getToken();
@@ -94,13 +94,13 @@ public class Parser {
 		currToken = pastBuffer.pop();
 	}
 
-	public ASTNode parse() throws Exception {
+	public ASTNode parse() throws ParseException, LexException {
 		ASTNode expr = expr();
 		eat(TokenType.EOF);
 		return expr;
 	}
 	
-	private ASTNode expr() throws Exception {
+	private ASTNode expr() throws ParseException, LexException {
 		TokenType type = currToken.getType();
 		if (type == TokenType.EVAL) {
 			eat(TokenType.EVAL);
@@ -139,7 +139,7 @@ public class Parser {
 		}
 	}
 	
-	private List<Tuple<String, ASTNode>> subList() throws Exception {
+	private List<Tuple<String, ASTNode>> subList() throws ParseException, LexException {
 		List<Tuple<String, ASTNode>> l = new ArrayList<>();
 		l.add(sub());
 		while (currToken.getType() == TokenType.COMMA) {
@@ -148,7 +148,7 @@ public class Parser {
 		}
 		return l;
 	}
-	private Tuple<String, ASTNode> sub() throws Exception {
+	private Tuple<String, ASTNode> sub() throws ParseException, LexException {
 		IdToken var = (IdToken) currToken;
 		eat(TokenType.ID);
 		String name = var.getValue();
@@ -156,23 +156,29 @@ public class Parser {
 		ASTNode expr = expr();
 		return new Tuple<>(name, expr);
 	}
-	private ASTNode term() throws Exception {
+	private ASTNode term() throws ParseException, LexException {
 		ASTNode node = factor();
 		TokenType type = currToken.getType();
+		boolean lastWasMult = false;
 		while (type == TokenType.MULT || type == TokenType.DIV) {
 			if (type == TokenType.MULT) {
 				eat(TokenType.MULT);
-				node = new Multiplication(node, factor());
+				if (lastWasMult)
+					((Multiplication)node).add(factor());
+				else
+					node = new Multiplication(node, factor());
+				lastWasMult = true;
 			} else {
 				eat(TokenType.DIV);
 				node = new Division(node, factor());
+				lastWasMult = false;
 			}
 			type = currToken.getType();
 		}
 		return node;
 	}
 	
-	private ASTNode	factor() throws Exception {
+	private ASTNode	factor() throws ParseException, LexException {
 		TokenType type = currToken.getType();
 		ASTNode node;
 		if (type == TokenType.CONSTANT) {
@@ -213,7 +219,7 @@ public class Parser {
 		return node;
 	}
 	
-	private ASTNode exp() throws Exception {
+	private ASTNode exp() throws ParseException, LexException {
 		TokenType type = currToken.getType();
 		switch (type) {
 			case ID: { 

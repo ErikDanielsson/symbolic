@@ -11,6 +11,15 @@ public class Exponential extends PureFunction {
 	}
 
 	@Override
+	public ASTNode eval(ASTNode arg) {
+		if (arg instanceof Function_) {
+			Function_ func = (Function_) arg;
+			if (func.getFuncName().equals("ln"))
+				return func.getArg();
+		}
+		return super.eval(arg);
+	}
+	@Override
 	public PureFunction copy() {
 		return new Exponential();
 	}
